@@ -1,6 +1,17 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Alert,
+  Link
+} from '@mui/material';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -28,45 +39,60 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-sm bg-white rounded-lg shadow p-6">
-        <h1 className="text-xl font-semibold text-gray-800 mb-4">Sign up</h1>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label htmlFor="email" className="block text-sm text-gray-600 mb-1">Email</label>
-            <input
+    <Container component="main" maxWidth="xs" sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card sx={{ width: '100%', p: 2 }}>
+        <CardContent>
+          <Typography component="h1" variant="h5" sx={{ mb: 3, fontWeight: 500 }}>
+            Sign up
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               id="email"
-              type="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800"
+              sx={{ mb: 2 }}
             />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm text-gray-600 mb-1">Password (min 6)</label>
-            <input
-              id="password"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password (min 6 chars)"
               type="password"
+              id="password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-gray-800"
+              sx={{ mb: 3 }}
             />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded font-medium disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Sign up'}
-          </button>
-        </form>
-        <p className="mt-4 text-sm text-gray-600">
-          Already have an account? <Link to="/login" className="text-blue-600">Log in</Link>
-        </p>
-      </div>
-    </div>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={loading}
+              sx={{ py: 1.2, mb: 2 }}
+            >
+              {loading ? 'Creating account...' : 'Sign up'}
+            </Button>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Already have an account?{' '}
+                <Link component={RouterLink} to="/login" color="primary" underline="hover">
+                  Log in
+                </Link>
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

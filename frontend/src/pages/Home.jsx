@@ -4,6 +4,24 @@ import { authService } from '../services/authService';
 import { useTasks } from '../hooks/useTasks';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Container,
+  Box,
+  TextField,
+  MenuItem,
+  Grid,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Alert,
+  CircularProgress,
+  Snackbar,
+  Stack
+} from '@mui/material';
 
 export default function Home() {
   const [search, setSearch] = useState('');
@@ -58,7 +76,6 @@ export default function Home() {
       }
       setModalOpen(false);
       setEditingTask(null);
-      setTimeout(() => setSuccessMsg(''), 2000);
     } catch (err) {
       setSubmitError(err.response?.data?.error || 'Failed to save');
     }
@@ -69,109 +86,123 @@ export default function Home() {
     try {
       await deleteTask(id);
       setSuccessMsg('Task deleted');
-      setTimeout(() => setSuccessMsg(''), 2000);
     } catch (err) {
       setSubmitError(err.response?.data?.error || 'Failed to delete');
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSuccessMsg('');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-lg font-semibold text-gray-800">Task Manager</h1>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-600 hover:text-gray-800"
-          >
-            Log out
-          </button>
-        </div>
-      </header>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+      <AppBar position="static" color="inherit">
+        <Container maxWidth="lg">
+          <Toolbar disableGutters>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
+              Task Manager
+            </Typography>
+            <Button color="inherit" onClick={handleLogout}>
+              Log out
+            </Button>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {successMsg && (
-          <p className="mb-4 p-2 bg-green-100 text-green-800 rounded text-sm">
-            {successMsg}
-          </p>
-        )}
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          <input
-            type="text"
+      <Container maxWidth="lg" component="main" sx={{ py: 4, flexGrow: 1 }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 4 }} alignItems="center">
+          <TextField
             placeholder="Search tasks..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-[120px] border border-gray-300 rounded px-3 py-2 text-gray-800"
+            fullWidth
+            sx={{ flexGrow: 1 }}
           />
-          <select
+          <TextField
+            select
+            label="Status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-gray-800 bg-white"
+            sx={{ minWidth: 150 }}
           >
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="in-progress">In progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <select
+            <MenuItem value="">All Statuses</MenuItem>
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="in-progress">In Progress</MenuItem>
+            <MenuItem value="completed">Completed</MenuItem>
+          </TextField>
+          <TextField
+            select
+            label="Priority"
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-gray-800 bg-white"
+            sx={{ minWidth: 150 }}
           >
-            <option value="">All priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-          <button
+            <MenuItem value="">All Priorities</MenuItem>
+            <MenuItem value="low">Low</MenuItem>
+            <MenuItem value="medium">Medium</MenuItem>
+            <MenuItem value="high">High</MenuItem>
+          </TextField>
+          <Button
+            variant="contained"
             onClick={handleCreate}
-            className="bg-blue-600 text-white px-4 py-2 rounded font-medium"
+            sx={{ minWidth: 120, height: 40 }}
           >
-            New task
-          </button>
-        </div>
+            New Task
+          </Button>
+        </Stack>
 
         {error && (
-          <p className="mb-4 p-2 bg-red-100 text-red-800 rounded text-sm">{error}</p>
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {error}
+          </Alert>
         )}
 
         {loading ? (
-          <p className="text-gray-600">Loading...</p>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
         ) : tasks.length === 0 ? (
-          <p className="text-gray-600">No tasks. Create one to get started.</p>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography color="text.secondary">No tasks found. Create one to get started.</Typography>
+          </Box>
         ) : (
-          <ul className="space-y-3">
+          <Grid container spacing={3}>
             {tasks.map((task) => (
-              <li key={task._id}>
+              <Grid item xs={12} sm={6} md={4} key={task._id}>
                 <TaskCard
                   task={task}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
-              </li>
+              </Grid>
             ))}
-          </ul>
+          </Grid>
         )}
-      </main>
+      </Container>
 
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-10">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              {editingTask ? 'Edit task' : 'New task'}
-            </h2>
-            {submitError && (
-              <p className="mb-2 text-sm text-red-600">{submitError}</p>
-            )}
+      <Dialog open={modalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
+        <DialogTitle>{editingTask ? 'Edit Task' : 'New Task'}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            {submitError && <Alert severity="error" sx={{ mb: 2 }}>{submitError}</Alert>}
             <TaskForm
+              key={editingTask ? editingTask._id : 'new'}
               task={editingTask}
               onSubmit={handleSubmit}
               onCancel={handleCloseModal}
             />
-          </div>
-        </div>
-      )}
-    </div>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      <Snackbar
+        open={!!successMsg}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={successMsg}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+    </Box>
   );
 }
